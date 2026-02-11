@@ -1,169 +1,109 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <cstdlib>
 #include "Deck.h"
 #include "Hand.h"
 #include "GameUI.h"
 #include "GameFunctions.h"
 
-int NumberOfPlayers;
+int NumberOfPlayers; // Tracks total players (1-3) at the table
 
 int main() {
-	std::srand(std::time(0));
+    std::srand((unsigned int)std::time(0)); // Seed random number generator
 
+    DrawPanel({ "Welcome to the Black Jack Game", "How many players? (1-3)" });
+    std::cin >> NumberOfPlayers;
+    system("cls");
 
+    // --- Input Validation ---
+    while (NumberOfPlayers < 1 || NumberOfPlayers > 3) {
+        system("cls");
+        DrawPanel({ "ERROR: Invalid Number of Players!", "Please enter a number between 1 and 3." });
+        std::cin >> NumberOfPlayers;
+    }
+    system("cls");
 
-	
-	DrawPanel({ "Welcome to the Black Jack Game", "How many players? (1-3)" });
-	std::cin >> NumberOfPlayers;
+    std::vector<Hand> Player(NumberOfPlayers); // Array of Player objects
+    Hand Dealer;                               // Single Dealer object
+    Dealer.Name = "Dealer";
 
-	system("cls");
-	
-	
-	while (NumberOfPlayers < 1 || NumberOfPlayers > 3) {
-		system("cls");
-		DrawPanel({
-			"ERROR: Invalid Number of Players!",
-			"Please enter a number between 1 and 3."
-			});
+    // --- Name Registration ---
+    for (int i = 0; i < NumberOfPlayers; i++) {
+        DrawPanel({ "Registration for Player " + std::to_string(i + 1), "Please enter your name:" });
+        std::cin >> Player[i].Name;
+    }
 
-		std::cin >> NumberOfPlayers;
-	}
-	system("cls");
+    Deck* GameDeck = new Deck(); // Create and allocate new deck
+    GameDeck->Shuffle();
 
+    // ================== MAIN GAME LOOP ==================
+    while (true) {
+        system("cls");
+        DisplayStats(Player);
 
-	std::vector<Hand> Player(NumberOfPlayers);
-	Hand Dealer;
+        // TODO: check the cards in deck
 
-	// Ask for Names
-	for (int i = 0; i < NumberOfPlayers; i++) {
-		// Use your DrawPanel for a nice prompt!
-		DrawPanel({
-			"Registration for Player " + std::to_string(i + 1),
-			"Please enter your name:"
-			});
+        // --- Bankruptcy Check ---
+        if (Player.size() <= 0) {
+            DrawPanel({ "Game Over" });
+            std::cout << "  (Press 'Enter' to continue...)" << std::endl;
+            std::cin.ignore(); std::cin.get();
+            break; // Exit Main Loop
+        }
+        else {
+            // Loop backwards to safely erase players while iterating
+            for (int i = 0; i < Player.size(); i++) {
+                if (Player[i].Credits <= 0) {
+                    DrawPanel({ "Total Credit of " + Player[i].Name + " reached 0. Player leaves table." });
+                    std::cout << "  (Press 'Enter' to continue...)" << std::endl;
+                    std::cin.ignore(); std::cin.get();
 
-		std::cin >> Player[i].Name;
-	}
+                    Player.erase(Player.begin() + i); // Remove player
+                    i -= 1; // Adjust index after erase
+                }
+            }
+            if (Player.size() <= 0) continue; // Restart loop if everyone is gone
+        }
 
-	// Set Dealer Name too
-	Dealer.Name = "Dealer";
+        // --- Start Round ---
+        system("cls");
+        DisplayStats(Player);
+        PlaceBets(Player);
 
-	// Create New Deck and Shuffle it
-	Deck* GameDeck = new Deck();
-	GameDeck->Shuffle();
+        system("cls");
+        DisplayStats(Player);
 
+        // --- Dealing Phase ---
+        for (int d = 0; d < 2; d++) {
+            for (int i = 0; i < Player.size(); i++) Player[i].AddCard(GameDeck->Draw());
+            Dealer.AddCard(GameDeck->Draw());
+        }
 
-	while (true) {
+        // --- Visualization Phase ---
+        system("cls");
+        DisplayStats(Player);
+        DrawGameTable(Player, Dealer, true); // Show table, Hide Dealer's 1st card
+        std::cout << "  (Press 'Enter' to collect cards...)" << std::endl;
+        std::cin.ignore(); std::cin.get();
 
-		system("cls");
-		DisplayStats(Player);
+        // --- Reset / Cleanup ---
+        for (int i = 0; i < Player.size(); i++) Player[i].ClearHand();
+        Dealer.ClearHand();
 
-		//check the cards in deck
+        // --- Next Round Prompt ---
+        char PlayerChoice; // Stores 'Y' or 'N'
+        bool NextRound = false;
+        while (!NextRound) {
+            DrawPanel({ "Do you want to start next round?", "Enter Y or N" });
+            std::cin >> PlayerChoice;
+            if (PlayerChoice == 'y' || PlayerChoice == 'Y') NextRound = true;
+            else break; // Logic here might need review (currently breaks prompt loop, not game loop)
+        }
+    }
 
-
-
-		//Keeps Player Credits in check
-		if (Player.size() <= 0) {
-			DrawPanel({ "Game Over" });
-			std::cout << "  (Press 'Enter' to continue...)" << std::endl;
-			std::cin.ignore(); // Clears buffer
-			std::cin.get();    // Waits for Enter
-			break;
-		}
-		else {
-			for (int i = 0; i < Player.size(); i++) {
-
-				if (Player[i].Credits <= 0) {
-				
-					DrawPanel({ "Total Credit of  " + Player[i].Name + " reached 0, and the player has left the table" });
-					std::cout << "  (Press 'Enter' to continue...)" << std::endl;
-					std::cin.ignore(); // Clears buffer
-					std::cin.get();    // Waits for Enter
-
-					Player.erase(Player.begin() + i);
-					i -= 1;
-				}
-			}
-
-			if (Player.size() <= 0) {
-				continue;
-			}
-
-		}
-
-		//round starts
-		system("cls");
-		DisplayStats(Player);
-
-
-
-		PlaceBets(Player);
-
-		system("cls");
-		DisplayStats(Player);
-		
-		for (int d = 0; d < 2; d++) { //this loop will make sure every player recieve one card at a time. 
-			for (int i = 0; i < Player.size(); i++) { // this loop will draw for each player
-				Player[i].AddCard(GameDeck->Draw());
-
-			}
-
-			Dealer.AddCard(GameDeck->Draw());
-		}
-
-
-		// ==========================================
-		// 3. VISUALIZATION PHASE
-		// ==========================================
-
-		// Clear the screen so we don't see the betting history anymore
-		system("cls");
-
-		// Draw the Header (Credits/Names)
-		DisplayStats(Player);
-
-		// Draw the Table (Cards side-by-side)
-		// We pass 'true' because the round just started, so Dealer hides one card.
-		DrawGameTable(Player, Dealer, true);
-
-		// Pause so the human can actually see the cards!
-		std::cout << "  (Press 'Enter' to collect cards...)" << std::endl;
-		std::cin.ignore(); // Clears buffer
-		std::cin.get();    // Waits for Enter
-
-
-
-		//only for memory managment purposes.
-			for (int i = 0; i < Player.size(); i++) {
-
-				Player[i].ClearHand();
-			}
-			Dealer.ClearHand();
-
-		char PlayerChoise;
-		bool NextRound = false;
-		while (NextRound == false) {
-			DrawPanel({ "Do you want to start next round?", "Enter Y or N" });
-			std::cin >> PlayerChoise;
-			if (PlayerChoise == 'y' || PlayerChoise == 'Y') {
-				NextRound = true;
-			}
-			else {
-				break;
-
-			}
-
-		}
-
-	}
-
-
-
-
-	delete GameDeck;
-	std::cout << "  (Game has been Closed Succesfully Press Enter to exit)" << std::endl;
-	std::cin.ignore(); // Clears buffer
-	std::cin.get();    // Waits for Enter
-	return 0;
+    delete GameDeck; // Clean up Heap memory
+    std::cout << "  (Game has been Closed Successfully. Press Enter to exit)" << std::endl;
+    std::cin.ignore(); std::cin.get();
+    return 0;
 }
