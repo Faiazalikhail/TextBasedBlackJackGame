@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\BlackJackGame\main.cpp(6,22): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\BlackJackGame\GameFunctions.h(94,1): warning C4715: 'GetBet': not all control paths return a value
+  BlackJackGame.vcxproj -> C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\x64\Debug\BlackJackGame.exe
