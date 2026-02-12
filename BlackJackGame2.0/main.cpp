@@ -43,6 +43,7 @@ int main() {
         DisplayStats(Player);
 
         // TODO: check the cards in deck
+        
 
         // --- Bankruptcy Check ---
         if (Player.size() <= 0) {
@@ -80,12 +81,32 @@ int main() {
             Dealer.AddCard(GameDeck->Draw());
         }
 
-        // --- Visualization Phase ---
+
+        // --- Calls Phase ---
+
+        for(int i = 0; i < Player.size(); i++) {
+            PlayTurn(Player, Dealer, i, GameDeck);
+        }
+
+        // --- Dealer Revealing his second card ---
+
         system("cls");
         DisplayStats(Player);
-        DrawGameTable(Player, Dealer, true); // Show table, Hide Dealer's 1st card
+        DrawGameTable(Player, Dealer, false); // Show table, Show Dealer's 1st card
         std::cout << "  (Press 'Enter' to collect cards...)" << std::endl;
         std::cin.ignore(); std::cin.get();
+
+        while (Dealer.Score < 17) {
+            Dealer.AddCard(GameDeck->Draw());
+            system("cls");
+            DisplayStats(Player);
+            DrawGameTable(Player, Dealer, false); // Show table, Show Dealer's 1st card
+            std::cout << "  (Press 'Enter' to collect cards...)" << std::endl;
+            std::cin.ignore(); std::cin.get();
+        }
+
+        // --- Rewarding System ---
+
 
         // --- Reset / Cleanup ---
         for (int i = 0; i < Player.size(); i++) Player[i].ClearHand();
@@ -98,7 +119,8 @@ int main() {
             DrawPanel({ "Do you want to start next round?", "Enter Y or N" });
             std::cin >> PlayerChoice;
             if (PlayerChoice == 'y' || PlayerChoice == 'Y') NextRound = true;
-            else break; // Logic here might need review (currently breaks prompt loop, not game loop)
+            else if(PlayerChoice == 'n' || PlayerChoice == 'N') break;
+            else { DrawPanel({ "Do you want to start next round?", "Enter Y or N" }); std::cin >> PlayerChoice; NextRound = false; }
         }
     }
 

@@ -30,40 +30,88 @@ void PlaceBets(std::vector<Hand>& Player) {
     }
 }
 
-void PlayTurn(std::vector<Hand>& Player, int PlayerIndex, Deck* GameDeck) {
+void PlayTurn(std::vector<Hand>& Player, Hand& Dealer, int PlayerIndex, Deck* GameDeck) {
+
+    bool TurnOver = false;
+
+    std::string AllActions[5] = { "[H]IT", "[S]TAND", "[D]OUBLE DOWN", "S[P]LIT", "P[A]SS (Surrender)" };
 
     
-    // --- Split Execution ---
-    if (Player[PlayerIndex].Cards.size() == 2 && Player[PlayerIndex].Cards[0]->Rank == Player[PlayerIndex].Cards[1]->Rank && Player[PlayerIndex].Credits >= Player[PlayerIndex].Bet) {
-        int Wager = Player[PlayerIndex].Bet;
-        Card* C1 = Player[PlayerIndex].Cards[0];
-        Card* C2 = Player[PlayerIndex].Cards[1];
-        std::string SName = Player[PlayerIndex].Name + " (Split)";
+    char PlayerCall;
+    
+    while (!TurnOver && Player[PlayerIndex].Score <= 21) {
+        
+        // --- Visualization Phase ---
+        system("cls");
+        DisplayStats(Player);
+        DrawGameTable(Player, Dealer, true); // Show table, Hide Dealer's 1st card
+        std::cout << "  (Press 'Enter' to continue...)" << std::endl;
+        std::cin.ignore(); std::cin.get();
 
-        Player[PlayerIndex].Credits -= Wager;
-        Player.push_back(Hand());
 
-        // Re-acquiring references here because push_back can move vector memory.
-        Hand& Current = Player[PlayerIndex];
-        Hand& Split = Player.back();
+        // --- Calls Validation ---
+        if (Player[PlayerIndex].Cards.size() == 2 && Player[PlayerIndex].Cards[0]->Rank == Player[PlayerIndex].Cards[1]->Rank && Player[PlayerIndex].Credits >= Player[PlayerIndex].Bet) {
+            DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "Available Calls: ", "           (H)IT, (S)TAND, (D)OUBLE DOWN, S(P)LIT, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+            std::cin >> PlayerCall;
+            while (PlayerCall != 'h' && PlayerCall != 'H' && PlayerCall != 's' && PlayerCall != 'S' && PlayerCall != 'd' && PlayerCall != 'D' && PlayerCall != 'P' && PlayerCall != 'p' && PlayerCall != 'a' && PlayerCall != 'A') {
+                DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "ERROR: Please Enter your Call accordingly", "Available Calls: ", "           (H)IT, (S)TAND, (D)OUBLE DOWN, S(P)LIT, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+                std::cin >> PlayerCall;
+            }
+        }
+        else if (Player[PlayerIndex].Credits >= Player[PlayerIndex].Bet) {
+            DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "Available Calls: ", "           (H)IT, (S)TAND, (D)OUBLE DOWN, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+            std::cin >> PlayerCall;
+            while (PlayerCall != 'h' && PlayerCall != 'H' && PlayerCall != 's' && PlayerCall != 'S' && PlayerCall != 'd' && PlayerCall != 'D' && PlayerCall != 'a' && PlayerCall != 'A') {
+                DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "ERROR: Please Enter your Call accordingly", "Available Calls: ", "           (H)IT, (S)TAND, (D)OUBLE DOWN, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+                std::cin >> PlayerCall;
+            }
+        }
+        else {
+            DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "Available Calls: ", "           (H)IT, (S)TAND, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+            std::cin >> PlayerCall;
+            while (PlayerCall != 'h' && PlayerCall != 'H' && PlayerCall != 's' && PlayerCall != 'S' && PlayerCall != 'a' && PlayerCall != 'A') {
+                DrawPanel({ Player[PlayerIndex].Name + "'s Turn", "ERROR: Please Enter your Call accordingly", "Available Calls: ", "           (H)IT, (S)TAND, P(A)SS (Surrender)" , "_________________________________", "Please enter your Call" });
+                std::cin >> PlayerCall;
+            }
+        }
 
-        Split.Name = SName; Split.Bet = Wager;
-        Split.AddCard(C2);
+        // --- Split Execution ---
+        if (PlayerCall == 'P' || PlayerCall == 'p') {
+            int Wager = Player[PlayerIndex].Bet;
+            Card* C1 = Player[PlayerIndex].Cards[0];
+            Card* C2 = Player[PlayerIndex].Cards[1];
+            std::string SName = Player[PlayerIndex].Name + " (Split)";
 
-        Current.ClearHand();
-        Current.Bet = Wager;
-        Current.AddCard(C1);
+            Player[PlayerIndex].Credits -= Wager;
+            Player.push_back(Hand());
 
+            // Re-acquiring references here because push_back can move vector memory.
+            Hand& Current = Player[PlayerIndex];
+            Hand& Split = Player.back();
+
+            Split.Name = SName; Split.Bet = Wager;
+            Split.AddCard(C2);
+
+            Current.ClearHand();
+            Current.Bet = Wager;
+            Current.AddCard(C1);
+
+        // --- Double Down Execution ---
+        }else if (PlayerCall == 'd' || PlayerCall == 'D') {
+            Player[PlayerIndex].Credits -= Player[PlayerIndex].Bet;
+            Player[PlayerIndex].Bet += Player[PlayerIndex].Bet;
+            Player[PlayerIndex].AddCard(GameDeck->Draw());
+            TurnOver = true;
+        // --- Hit Execution ---
+        }else if (PlayerCall == 'H' || PlayerCall == 'h') {
+            Player[PlayerIndex].AddCard(GameDeck->Draw());
+        // --- Stand Execution ---
+        }else if (PlayerCall == 'S' || PlayerCall == 's') {
+            TurnOver = true;
+        // --- Pass Execution ---
+        }else if (PlayerCall == 'a' || PlayerCall == 'A') {
+            Player[PlayerIndex].Credits += Player[PlayerIndex].Bet / 2;
+            TurnOver = true;
+        }
     }
-
-
-    // --- Double Down Execution ---
-
-
-    // --- Hit Execution ---
-
-    // --- Stand Execution ---
-
-    // --- Pass Execution ---
-
 }
