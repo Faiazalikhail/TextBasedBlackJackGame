@@ -1,6 +1,4 @@
-﻿  Deck.cpp
-  Hand.cpp
-  main.cpp
+﻿  main.cpp
 C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\TextBasedBlackJackGame\BlackJackGame2.0\GameUI.h(84,84): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
@@ -13,5 +11,4 @@ C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\TextBa
 C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\TextBasedBlackJackGame\BlackJackGame2.0\GameUI.h(160,98): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-  Generating Code...
   BlackJackGame2.0.vcxproj -> C:\Users\Mohammad\Desktop\Programming Fundamentals Excercises\Assignment1\TextBasedBlackJackGame\x64\Debug\BlackJackGame2.0.exe
