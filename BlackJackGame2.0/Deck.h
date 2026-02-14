@@ -2,14 +2,23 @@
 #include "Card.h"
 #include <vector>
 
+// class managing the deck of 52 cards
 class Deck {
 private:
-    std::vector<Card*> Cards; // Stores the stack of Card objects (the deck).
+    // stores the actual card objects
+    std::vector<Card*> Cards;
 
 public:
+    // constructor
     Deck();
+    // destructor
     ~Deck();
-    Card* Draw();   // Returns the top card and removes it from the deck.
-    void Shuffle(); // Randomizes the order of cards in the vector.
-    void PrintDeck(); // Helper to visualize deck content (debugging).
+    // returns top card and removes from deck
+    Card* Draw();
+    // randomizes card order
+    void Shuffle();
+    // debug helper
+    void PrintDeck();
+    // returns current deck size
+    int GetRemainingCards() { return Cards.size(); }
 };

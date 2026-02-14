@@ -3,20 +3,32 @@
 #include <vector>
 #include <string>
 
+// class managing a player or dealer's cards and stats
 class Hand {
 private:
-    int AceCounter; // Tracks number of Aces to handle soft/hard totals (1 vs 11).
+    // tracks aces to handle soft/hard totals
+    int AceCounter;
 
 public:
-    std::vector<Card*> Cards; // Stores pointers to the Card objects currently in this hand.
-    int Score;      // Current calculated value of the hand (e.g., 21).
-    int Credits;    // Player's remaining money/balance.
-    int Bet;        // Amount currently wagered in this round.
-    std::string Name; // Name of the player (e.g., "Player 1", "Dealer").
+    // collection of card pointers in this hand
+    std::vector<Card*> Cards;
+    // current calculated score
+    int Score;
+    // player's available money
+    int Credits;
+    // money wagered on this specific hand
+    int Bet;
+    // display name for the hand owner
+    std::string Name;
 
+    // constructor
     Hand();
+    // destructor
     ~Hand();
+    // adds card and updates score
     void AddCard(Card* newCard);
+    // displays hand to console
     void PrintHand();
+    // resets hand for new round
     void ClearHand();
 };

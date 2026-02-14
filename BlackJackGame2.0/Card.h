@@ -1,8 +1,11 @@
 #pragma once
 #include <string>
 
+// class representing a single playing card
 class Card {
 public:
-    int Rank;       // 1=Ace, 11-13=Face, 2-10=Number. Holds the card's value.
-    std::string Suit; // "Hearts", "Diamonds", "Clubs", "Spades". Holds the card's suit.
+    // holds the card's value (1-13)
+    int Rank;
+    // holds the card's suit text
+    std::string Suit;
 };
